@@ -3,6 +3,11 @@
 Status: **Draft for approval** · Target release: **1.0.0** · Platform: native Android (Kotlin, Android Studio)
 Source of truth: `/home/kirill/Music/LIBRARY.html` (read-only)
 
+> **Implementation note (2026-10-10).** Where this plan says generated assets live "in repo"
+> (e.g. §6.1, milestone M1), the shipped implementation deviates deliberately: app data is
+> **generated at build time** and is **git-ignored**. A bundled `example/LIBRARY.html` lets a
+> fresh clone build without the Music tree. See `README.md`, `AGENTS.md`, and `CHANGELOG.md`.
+
 ---
 
 ## 1. Summary
