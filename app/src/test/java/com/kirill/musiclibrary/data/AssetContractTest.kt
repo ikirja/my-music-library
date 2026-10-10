@@ -31,15 +31,14 @@ class AssetContractTest {
     }
 
     @Test
-    fun countsMatchTheLibrary() {
+    fun schemaIsValidAndNonEmpty() {
         val counts = library.counts
-        assertThat(counts.artists).isEqualTo(14)
-        assertThat(counts.albums).isEqualTo(115)
-        assertThat(counts.discs).isEqualTo(129)
-        assertThat(counts.tracks).isEqualTo(1578)
-        assertThat(counts.lyrics).isEqualTo(1030)
         assertThat(library.schemaVersion).isEqualTo(1)
         assertThat(library.sourceHash).startsWith("sha256:")
+        assertThat(library.artists).isNotEmpty()
+        assertThat(counts.artists).isGreaterThan(0)
+        assertThat(counts.albums).isGreaterThan(0)
+        assertThat(counts.tracks).isGreaterThan(0)
     }
 
     @Test

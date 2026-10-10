@@ -2,6 +2,9 @@
 TEMP.md
 TEMP_*.md
 
+# Generated app data — produced at build time from LIBRARY.html (see README.md)
+app/src/main/assets/library/
+
 # Gradle
 .gradle/
 build/

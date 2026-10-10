@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Changed
+
+- App data (`library.json`, `lyrics.json`, `covers/`) is now generated at build time from
+  `LIBRARY.html` and is **no longer committed**; a self-contained `example/LIBRARY.html` is
+  bundled so a fresh clone builds without the Music tree. The generator auto-discovers the
+  real source (`MUSIC_LIBRARY`/`MUSIC_SOURCE` env or the default Music path) and falls back to
+  the example.
+
 ## [1.0.0] - 2026-10-10
 
 ### Added

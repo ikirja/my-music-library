@@ -86,3 +86,20 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+// Regenerate the app data (library.json, lyrics.json, covers/) from LIBRARY.html before every
+// variant build, so a fresh clone builds without committing generated assets. The generator
+// auto-discovers /home/kirill/Music/LIBRARY.html when present, else example/LIBRARY.html.
+// Override the interpreter with -Ppython=/path/to/python (must have Pillow for WebP covers).
+val generateLibraryAssets = tasks.register<Exec>("generateLibraryAssets") {
+    group = "build"
+    description = "Regenerate app data from LIBRARY.html (defaults to example/LIBRARY.html)"
+    workingDir = rootProject.projectDir
+    val python = (project.findProperty("python") as String?)
+        ?: System.getenv("MUSICLIB_PYTHON")
+        ?: "python3"
+    commandLine(python, ".kilo/skills/update-library/generate_library.py")
+}
+
+tasks.named("preBuild").configure { dependsOn(generateLibraryAssets) }
+

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Music Library (example)</title>
+</head>
+<body>
+<!--
+  EXAMPLE source of truth for my-music-library.
+
+  This is a tiny, self-contained stand-in for the real /home/kirill/Music/LIBRARY.html.
+  The app data (library.json, lyrics.json, covers/) is generated from a file like this at
+  build time. To build with your own catalogue, either:
+    * place it at /home/kirill/Music/LIBRARY.html (used automatically when present), or
+    * point the generator at it:  MUSIC_LIBRARY=/path/to/LIBRARY.html ./gradlew :app:assembleDebug
+  See README.md and AGENTS.md. Generated assets are git-ignored and never committed.
+
+  It exercises: a multi-disc album, an embedded cover thumbnail, an album with only a
+  disk cover, an album with no art (gradient + initials placeholder), USB positions, and
+  lyrics with a Romaji badge and CJK text.
+-->
+<script>
+const DATA = [{"name":"Demo Artist","albums":[{"folder":"Demo Artist - 2023 - First Light","year":2023,"title":"First Light","discs":[{"name":"Disc 1","tracks":[{"title":"Opening","n":1,"dur":212.4,"size":18874368,"file":"Demo Artist/Demo Artist - 2023 - First Light/1-01 - Opening.flac","usb":1},{"title":"Interlude","n":2,"dur":95.0,"size":10485760,"file":"Demo Artist/Demo Artist - 2023 - First Light/1-02 - Interlude.flac","usb":null}]},{"name":"Disc 2","tracks":[{"title":"Кода","n":1,"dur":301.2,"size":26214400,"file":"Demo Artist/Demo Artist - 2023 - First Light/2-01 - Coda.flac","usb":2}]}],"tracks":3,"dur":608.6,"cover_src":"Demo Artist/Demo Artist - 2023 - First Light/cover.jpg","thumb":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="},{"folder":"Demo Artist - 2024 - No Art","year":2024,"title":"No Art","discs":[{"name":null,"tracks":[{"title":"Untitled","n":1,"dur":120.0,"size":8388608,"file":"Demo Artist/Demo Artist - 2024 - No Art/01 - Untitled.flac","usb":3}]}],"tracks":1,"dur":120.0}]},{"name":"Example Band","albums":[{"folder":"Example Band - 2020 - Sample","year":2020,"title":"Sample","discs":[{"name":null,"tracks":[{"title":"Sample Song","n":1,"dur":180.0,"size":12582912,"file":"Example Band/Example Band - 2020 - Sample/01 - Sample Song.flac","usb":null}]}],"tracks":1,"dur":180.0}]}];
+const LYRICS = {"Demo Artist/Demo Artist - 2023 - First Light/2-01 - Coda.flac":{"l":"La la la\nCoda line","s":"lrclib","r":false},"Example Band/Example Band - 2020 - Sample/01 - Sample Song.flac":{"l":"サンプル\nExample lyric line","s":"lrclib","r":true}};
+</script>
+</body>
+</html>

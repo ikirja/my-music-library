@@ -41,9 +41,15 @@ $PY .kilo/skills/update-library/generate_library.py \
   [--cover-px 1024] [--cover-quality 82] [--format webp] [--no-covers]
 ```
 
+The source of truth is auto-discovered: `--library`/`--source` flags, then the
+`MUSIC_LIBRARY`/`MUSIC_SOURCE` environment variables, then `/home/kirill/Music/LIBRARY.html`
+when present, then the bundled `example/LIBRARY.html`. The generated assets are git-ignored
+and are produced automatically before every build by the `generateLibraryAssets` Gradle task
+(override the interpreter with `-Ppython=/path/to/python`).
+
 ## Workflow
 
-1. Confirm the Music root and `LIBRARY.html` path.
+1. Confirm the source (`LIBRARY.html`) the generator will use — it prints the chosen path.
 2. Run `--check --dry-run` to validate and print the plan (counts, cover coverage, warnings).
 3. Run for real. It short-circuits when the source hash is unchanged (`--force` overrides).
    `--no-covers` skips cover asset writing and emits `coverAsset: null` for every album;

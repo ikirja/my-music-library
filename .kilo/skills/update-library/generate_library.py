@@ -358,9 +358,17 @@ def verify(out_dir: Path, library, lyrics) -> None:
 def main(argv=None) -> int:
     here = Path(__file__).resolve()
     project_root = here.parents[3]  # .kilo/skills/update-library -> project root
+    real_library = Path("/home/kirill/Music/LIBRARY.html")
+    real_source = Path("/home/kirill/Music")
+    example_library = project_root / "example" / "LIBRARY.html"
+
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--source", type=Path, default=Path("/home/kirill/Music"))
-    ap.add_argument("--library", type=Path, default=None)
+    ap.add_argument("--source", type=Path, default=None,
+                    help="Music root for on-disk cover recovery (default: $MUSIC_SOURCE, "
+                         "else /home/kirill/Music, else the example dir)")
+    ap.add_argument("--library", type=Path, default=None,
+                    help="LIBRARY.html path (default: $MUSIC_LIBRARY, else /home/kirill/Music/"
+                         "LIBRARY.html if present, else example/LIBRARY.html)")
     ap.add_argument("--out", type=Path, default=project_root / "app/src/main/assets/library")
     ap.add_argument("--check", action="store_true", help="validate and show plan, write nothing")
     ap.add_argument("--dry-run", action="store_true", help="compute but write nothing")
@@ -372,9 +380,31 @@ def main(argv=None) -> int:
     ap.add_argument("--generated-at", default=None, help="override generatedAt (reproducible builds)")
     args = ap.parse_args(argv)
 
-    args.source = args.source.resolve()
+    # Resolve the source of truth: explicit flag > env var > real Music tree > bundled example.
+    if args.library:
+        lib_path = args.library
+    elif os.environ.get("MUSIC_LIBRARY"):
+        lib_path = Path(os.environ["MUSIC_LIBRARY"])
+    elif real_library.is_file():
+        lib_path = real_library
+    else:
+        lib_path = example_library
+    lib_path = lib_path.resolve()
+    using_example = lib_path == example_library.resolve()
+
+    if args.source:
+        source = args.source
+    elif os.environ.get("MUSIC_SOURCE"):
+        source = Path(os.environ["MUSIC_SOURCE"])
+    elif using_example:
+        source = lib_path.parent
+    elif real_source.is_dir():
+        source = real_source
+    else:
+        source = lib_path.parent
+
+    args.source = source.resolve()
     args.out = args.out.resolve()
-    lib_path = (args.library or (args.source / "LIBRARY.html")).resolve()
 
     if args.dry_run:
         args.check = True
@@ -385,7 +415,12 @@ def main(argv=None) -> int:
         return 2
     if not lib_path.is_file():
         print(f"source library not found: {lib_path}", file=sys.stderr)
+        print("provide one with --library or MUSIC_LIBRARY, or use example/LIBRARY.html", file=sys.stderr)
         return 2
+
+    print(f"source: {lib_path}")
+    if using_example:
+        print("  (using the bundled example/LIBRARY.html; set MUSIC_LIBRARY for your own)")
 
     source_hash = sha256_file(lib_path)
 
@@ -413,6 +448,16 @@ def main(argv=None) -> int:
     if not data:
         print("source DATA is empty", file=sys.stderr)
         return 3
+
+    # On a real run, clear previously generated covers so the output contains exactly the
+    # referenced set (switching sources must not leave stale assets behind). Only ever inside
+    # --out.
+    if not args.check and not args.no_covers:
+        covers_dir = args.out / "covers"
+        if covers_dir.is_dir():
+            for stale in covers_dir.iterdir():
+                if stale.is_file():
+                    stale.unlink()
 
     if args.generated_at:
         generated_at = args.generated_at

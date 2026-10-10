@@ -227,6 +227,47 @@ class GeneratorTest(unittest.TestCase):
         self.assertIsNone(albums["Alpha"]["coverAsset"])
         self.assertIsNotNone(albums["Beta"]["coverAsset"])  # disk recovery unaffected
 
+    def test_stale_covers_removed_on_regeneration(self):
+        self.run_gen("--force")
+        covers = self.out / "covers"
+        self.assertEqual(len(list(covers.iterdir())), 2)
+        # Strip all art from the source, then regenerate: the output must have no stale covers.
+        data = json.loads(json.dumps(DATA))
+        for album in data[0]["albums"]:
+            album.pop("thumb", None)
+            album.pop("cover_src", None)
+        (self.source / "Test Artist" / "Test Artist - 2002 - Beta" / "cover.png").unlink()
+        self.library.write_text(
+            "<html><body>\nconst DATA = %s;\nconst LYRICS = %s;\n</body></html>\n"
+            % (json.dumps(data, ensure_ascii=False, separators=(",", ":")),
+               json.dumps(LYRICS, ensure_ascii=False, separators=(",", ":"))),
+            encoding="utf-8",
+        )
+        self.run_gen("--force")
+        self.assertEqual(len(list(covers.iterdir())), 0)
+        self.assertEqual(self.load("library.json")["counts"]["covers"], 0)
+
+    def test_shipped_example_generates(self):
+        repo = SCRIPT.parents[3]
+        example = repo / "example" / "LIBRARY.html"
+        self.assertTrue(example.is_file(), example)
+        out = self.root / "example-out"
+        cmd = [
+            sys.executable, str(SCRIPT),
+            "--library", str(example), "--source", str(example.parent),
+            "--out", str(out), "--force",
+        ]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+        lib = self.load("library.json", out=out)
+        c = lib["counts"]
+        self.assertEqual(c["artists"], 2)
+        self.assertEqual(c["albums"], 3)
+        self.assertEqual(c["discs"], 4)
+        self.assertEqual(c["tracks"], 5)
+        self.assertEqual(c["lyrics"], 2)
+        self.assertEqual(c["covers"], 1)
+
     def test_refuses_out_overlapping_source(self):
         bad_out = self.source / "nested"
         res = self.run_gen("--force", out=bad_out)
