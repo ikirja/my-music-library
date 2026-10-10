@@ -177,23 +177,19 @@ def resolve_cover(album, album_dir: Path, out_dir: Path, album_id: str, args):
     try:
         if can_convert:
             data = _normalize_image_bytes(raw, args.cover_px, args.cover_quality, want_fmt)
+            warning = None
         else:
-            # JPEG fallback: embedded thumb bytes are already JPEG; disk files are copied as-is.
+            # JPEG fallback: embedded thumb bytes are written as-is; disk files are copied as-is.
             data = raw
             if want_fmt == "webp" and _HAS_PIL and not _HAS_WEBP:
                 warning = f"{album_id}: WebP unavailable, wrote JPEG for {source_kind}"
-                asset_path.parent.mkdir(parents=True, exist_ok=True)
-                asset_path.write_bytes(data)
-                return asset_rel, warning
-            if not _HAS_PIL:
-                warning = f"{album_id}: Pillow unavailable, copied raw image ({source_kind})"
             else:
-                warning = None
+                warning = f"{album_id}: Pillow unavailable, copied raw image ({source_kind})"
         asset_path.parent.mkdir(parents=True, exist_ok=True)
         tmp = asset_path.with_suffix(asset_path.suffix + ".tmp")
         tmp.write_bytes(data)
         os.replace(tmp, asset_path)
-        return asset_rel, None
+        return asset_rel, warning
     except Exception as exc:  # noqa: BLE001 - report and continue
         return None, f"{album_id}: cover failed from {source_kind}: {exc}"
 

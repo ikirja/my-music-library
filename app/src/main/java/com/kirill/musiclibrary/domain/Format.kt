@@ -30,11 +30,11 @@ object Format {
         return if (h > 0) "${h}h ${m.toString().padStart(2, '0')}m" else "$m:${s.toString().padStart(2, '0')}"
     }
 
-    /** `size(b)` — MB, 0 decimals when >= 10 MB else 1. */
+    /** `size(b)` — MB, 0 decimals when >= 10 MB else 1. Always uses `.` as the decimal mark. */
     fun size(bytes: Long): String {
         val mb = bytes / 1048576.0
         val decimals = if (bytes >= 10485760L) 0 else 1
-        return String.format("%.${decimals}f MB", mb)
+        return String.format(java.util.Locale.US, "%.${decimals}f MB", mb)
     }
 
     /** `initials(name)` — first letters of the first two whitespace-separated words. */

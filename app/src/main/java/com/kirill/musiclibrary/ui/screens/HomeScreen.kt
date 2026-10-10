@@ -107,7 +107,7 @@ private fun StatsHero(artists: Int, albums: Int, tracks: Int, duration: String) 
                 modifier = Modifier.padding(top = 4.dp),
             )
             Text(
-                "${"%,d".format(tracks)} tracks · $duration",
+                "${"%,d".format(java.util.Locale.US, tracks)} tracks · $duration",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp),
