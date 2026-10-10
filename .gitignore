@@ -1,0 +1,21 @@
+# Developer-only decision logs — never committed
+TEMP.md
+TEMP_*.md
+
+# Gradle
+.gradle/
+build/
+gradle/wrapper/gradle-wrapper.jar.sha256
+
+# Android / IDE
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.iml
+.idea/
+.kotlin/
+
+# OS
+.DS_Store
+Thumbs.db
