@@ -14,6 +14,8 @@ All notable changes to this project are documented here. The format is based on
   full music catalogue: artists, albums, discs, tracks, USB play positions, lyrics, statistics.
 - Adaptive navigation (bottom bar ↔ navigation rail) with Home, Artists, Albums, Tracks, and
   Lyrics destinations, plus On USB, Search, and Settings/About.
+- Modern adaptive launcher icon (a gradient vinyl disc) with round/legacy fallbacks for older
+  Android versions.
 - Album cover art wherever available: embedded thumbnails and covers recovered from disk,
   normalized to `covers/<albumId>.webp` (≤1024 px, WebP q82); deterministic gradient + initials
   placeholder only when no art exists.
@@ -31,3 +33,7 @@ All notable changes to this project are documented here. The format is based on
   real `/home/kirill/Music/LIBRARY.html` when present, falling back to the example.
 - Unit tests (data contract over the generated assets, formatting, search, USB ordering),
   generator tests, an instrumented navigation smoke test, and the `scripts/pre-commit.sh` gate.
+
+### Fixed
+
+- Album detail now shows the full **square** cover art instead of cropping the top and bottom.

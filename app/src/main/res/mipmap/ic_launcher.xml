@@ -1,19 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Legacy launcher icon (API < 26): gradient tile with the vinyl disc. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <path android:pathData="M21,0h66a21,21 0 0 1 21,21v66a21,21 0 0 1 -21,21h-66a21,21 0 0 1 -21,-21v-66a21,21 0 0 1 21,-21z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="0"
+                android:endX="108"
+                android:endY="108">
+                <item android:offset="0.0" android:color="#FF6C7BFF" />
+                <item android:offset="0.55" android:color="#FF8E6BFF" />
+                <item android:offset="1.0" android:color="#FFB15BFF" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
     <path
-        android:fillColor="#5B6CFF"
-        android:pathData="M21,0h66a21,21 0 0 1 21,21v66a21,21 0 0 1 -21,21h-66a21,21 0 0 1 -21,-21v-66a21,21 0 0 1 21,-21z" />
-    <group
-        android:scaleX="2.0"
-        android:scaleY="2.0"
-        android:translateX="30"
-        android:translateY="30">
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M12,3v10.55c-0.59,-0.34 -1.27,-0.55 -2,-0.55 -2.21,0 -4,1.79 -4,4s1.79,4 4,4 4,-1.79 4,-4V7h4V3h-6z" />
-    </group>
+        android:fillColor="#FF12141C"
+        android:pathData="M24,54 a30,30 0 1,0 60,0 a30,30 0 1,0 -60,0 z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#22FFFFFF"
+        android:strokeWidth="1"
+        android:pathData="M25.5,54 a28.5,28.5 0 1,0 57,0 a28.5,28.5 0 1,0 -57,0 z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF3A4463"
+        android:strokeWidth="1"
+        android:pathData="M30,54 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0 z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF3A4463"
+        android:strokeWidth="1"
+        android:pathData="M35,54 a19,19 0 1,0 38,0 a19,19 0 1,0 -38,0 z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF3A4463"
+        android:strokeWidth="1"
+        android:pathData="M40,54 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 z" />
+    <path
+        android:fillColor="#FF56E0C0"
+        android:pathData="M44.5,54 a9.5,9.5 0 1,0 19,0 a9.5,9.5 0 1,0 -19,0 z" />
+    <path
+        android:fillColor="#FF12141C"
+        android:pathData="M51.5,54 a2.5,2.5 0 1,0 5,0 a2.5,2.5 0 1,0 -5,0 z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#55FFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M34,38 a27,27 0 0,1 17,-12" />
 </vector>
