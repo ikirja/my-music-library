@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -90,13 +92,19 @@ dependencies {
 // Regenerate the app data (library.json, lyrics.json, covers/) from LIBRARY.html before every
 // variant build, so a fresh clone builds without committing generated assets. The generator
 // auto-discovers /home/kirill/Music/LIBRARY.html when present, else example/LIBRARY.html.
-// Override the interpreter with -Ppython=/path/to/python (must have Pillow for WebP covers).
+// The interpreter is chosen from, in order: -Ppython=…, the MUSICLIB_PYTHON env var, a
+// `python=` key in local.properties (git-ignored — handy in Android Studio), then `python3`.
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
 val generateLibraryAssets = tasks.register<Exec>("generateLibraryAssets") {
     group = "build"
     description = "Regenerate app data from LIBRARY.html (defaults to example/LIBRARY.html)"
     workingDir = rootProject.projectDir
     val python = (project.findProperty("python") as String?)
         ?: System.getenv("MUSICLIB_PYTHON")
+        ?: localProperties.getProperty("python")
         ?: "python3"
     commandLine(python, ".kilo/skills/update-library/generate_library.py")
 }

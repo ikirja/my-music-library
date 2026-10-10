@@ -66,11 +66,26 @@ MUSIC_LIBRARY=/home/kirill/Music/LIBRARY.html MUSIC_SOURCE=/home/kirill/Music \
 python3 .kilo/skills/update-library/generate_library.py
 ```
 
-Covers are normalized to WebP q82 (≤1024 px) when Pillow is available; pick the interpreter
-with `-Ppython=/path/to/python`. Without Pillow the generator falls back to copying raw images
-and warns. The generator hashes `LIBRARY.html` and short-circuits when unchanged (`--force`
-overrides). See `.kilo/skills/update-library/SKILL.md` for the full contract and
-`example/LIBRARY.html` for the data format.
+Covers are normalized to WebP q82 (≤1024 px) when Pillow is available. The interpreter is
+chosen from, in order: `-Ppython=/path/to/python`, the `MUSICLIB_PYTHON` env var, a `python=`
+key in `local.properties` (git-ignored — convenient in Android Studio), then `python3`. Without
+Pillow the generator falls back to copying raw images and warns. See
+`.kilo/skills/update-library/SKILL.md` for the full contract and `example/LIBRARY.html` for the
+data format.
+
+### Android Studio
+
+Open the **project root** (the folder containing `settings.gradle.kts`) as a project; Android
+Studio syncs Gradle and generates the app data on the first build. For WebP covers, add a line
+to `local.properties`:
+
+```properties
+python=/home/kirill/.venvs/mkpfs/bin/python
+```
+
+Then press **Run ▶** (installs and launches on the selected device), or use the Gradle tool
+window for `:app:connectedDebugAndroidTest`. The `generateLibraryAssets` task runs before every
+build; its output (`source: …`, counts) appears in the Build window.
 
 ## Architecture
 
