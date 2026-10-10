@@ -6,14 +6,6 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
-### Changed
-
-- App data (`library.json`, `lyrics.json`, `covers/`) is now generated at build time from
-  `LIBRARY.html` and is **no longer committed**; a self-contained `example/LIBRARY.html` is
-  bundled so a fresh clone builds without the Music tree. The generator auto-discovers the
-  real source (`MUSIC_LIBRARY`/`MUSIC_SOURCE` env or the default Music path) and falls back to
-  the example.
-
 ## [1.0.0] - 2026-10-10
 
 ### Added
@@ -29,7 +21,13 @@ All notable changes to this project are documented here. The format is based on
 - Material You dynamic colour (Android 12+), curated fallback scheme, light/dark/system modes,
   and an edge-to-edge layout.
 - Project-local `update-library` Kilo skill (`generate_library.py`) that regenerates
-  `library.json`, `lyrics.json`, and all cover assets from `/home/kirill/Music/LIBRARY.html`,
-  with hashing/short-circuit, validation, atomic writes, and referential-integrity verification.
+  `library.json`, `lyrics.json`, and all cover assets from `LIBRARY.html`, with source
+  auto-discovery, hashing/short-circuit, validation, atomic writes, and referential-integrity
+  verification.
+- App data is **generated at build time** (the `generateLibraryAssets` Gradle task runs before
+  `preBuild`) and is **git-ignored** — never committed. A self-contained `example/LIBRARY.html`
+  is bundled so a fresh clone builds without the Music tree; the generator discovers its source
+  from `--library`/`--source`, the `MUSIC_LIBRARY`/`MUSIC_SOURCE` environment variables, or the
+  real `/home/kirill/Music/LIBRARY.html` when present, falling back to the example.
 - Unit tests (data contract over the generated assets, formatting, search, USB ordering),
   generator tests, an instrumented navigation smoke test, and the `scripts/pre-commit.sh` gate.
