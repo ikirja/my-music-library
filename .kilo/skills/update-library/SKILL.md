@@ -46,6 +46,8 @@ $PY .kilo/skills/update-library/generate_library.py \
 1. Confirm the Music root and `LIBRARY.html` path.
 2. Run `--check --dry-run` to validate and print the plan (counts, cover coverage, warnings).
 3. Run for real. It short-circuits when the source hash is unchanged (`--force` overrides).
+   `--no-covers` skips cover asset writing and emits `coverAsset: null` for every album;
+   such a partial file never short-circuits, so the next normal run restores the covers.
 4. Run `./gradlew :app:testDebugUnitTest` to confirm the new assets parse (data-contract test).
 5. Report counts, **cover coverage (`n/115`)** and any album without art, warnings, and any
    library `usb`-position changes.

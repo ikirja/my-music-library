@@ -169,7 +169,9 @@ def resolve_cover(album, album_dir: Path, out_dir: Path, album_id: str, args):
     asset_rel = f"covers/{album_id}.{ext}"
     asset_path = out_dir / asset_rel
 
-    if args.no_covers or args.dry_run or args.check:
+    if args.no_covers:
+        return None, None
+    if args.dry_run or args.check:
         return asset_rel, None
 
     try:
@@ -393,7 +395,12 @@ def main(argv=None) -> int:
         if existing.is_file():
             try:
                 prev = json.loads(existing.read_text(encoding="utf-8"))
-                if prev.get("sourceHash") == f"sha256:{source_hash}":
+                # Only short-circuit a *complete* run: a covers-less file (from `--no-covers`)
+                # must be regenerated so missing cover assets are restored.
+                if (
+                    prev.get("sourceHash") == f"sha256:{source_hash}"
+                    and prev.get("counts", {}).get("covers", 0) > 0
+                ):
                     print("up to date (source unchanged); nothing to do")
                     return 0
             except Exception:  # noqa: BLE001

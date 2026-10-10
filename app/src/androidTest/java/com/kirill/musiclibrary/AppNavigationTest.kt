@@ -29,6 +29,6 @@ class AppNavigationTest {
     @Test
     fun usbEmptyStateExplainsTheStickIsNotPopulated() {
         rule.onNodeWithText("On USB").performClick()
-        rule.onNodeWithText("On USB").assertIsDisplayed()
+        rule.onNodeWithText("Nothing on the USB stick yet").assertIsDisplayed()
     }
 }

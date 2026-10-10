@@ -197,6 +197,20 @@ class GeneratorTest(unittest.TestCase):
         self.assertEqual(res.returncode, 0)
         self.assertFalse((self.out / "library.json").exists())
 
+    def test_no_covers_nulls_cover_assets(self):
+        res = self.run_gen("--force", "--no-covers")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        lib = self.load("library.json")
+        self.assertEqual(lib["counts"]["covers"], 0)
+        for album in lib["artists"][0]["albums"]:
+            self.assertIsNone(album["coverAsset"])
+
+    def test_normal_run_after_no_covers_regenerates(self):
+        self.run_gen("--force", "--no-covers")
+        res = self.run_gen()  # no --force: must not short-circuit a covers-less file
+        self.assertNotIn("up to date", res.stdout.lower())
+        self.assertEqual(self.load("library.json")["counts"]["covers"], 2)
+
     def test_refuses_out_overlapping_source(self):
         bad_out = self.source / "nested"
         res = self.run_gen("--force", out=bad_out)
