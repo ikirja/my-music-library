@@ -151,8 +151,12 @@ def resolve_cover(album, album_dir: Path, out_dir: Path, album_id: str, args):
     source_kind = None
 
     if embedded and isinstance(embedded, str) and embedded.startswith("data:"):
-        raw = _decode_data_uri(embedded)
-        source_kind = "thumb"
+        try:
+            raw = _decode_data_uri(embedded)
+            source_kind = "thumb"
+        except Exception:  # noqa: BLE001 - malformed thumb: fall back to the disk scan
+            raw = None
+            source_kind = None
 
     if raw is None:
         disk = scan_disk_cover(album_dir)

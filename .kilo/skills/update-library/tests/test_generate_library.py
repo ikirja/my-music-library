@@ -211,6 +211,22 @@ class GeneratorTest(unittest.TestCase):
         self.assertNotIn("up to date", res.stdout.lower())
         self.assertEqual(self.load("library.json")["counts"]["covers"], 2)
 
+    def test_malformed_thumb_does_not_crash_and_falls_back(self):
+        data = json.loads(json.dumps(DATA))
+        # Alpha has only the (now malformed) thumb and no disk art -> null cover, no crash.
+        data[0]["albums"][0]["thumb"] = "data:image/png;base64,A"
+        data_js = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+        lyr_js = json.dumps(LYRICS, ensure_ascii=False, separators=(",", ":"))
+        self.library.write_text(
+            "<html><body>\nconst DATA = %s;\nconst LYRICS = %s;\n</body></html>\n" % (data_js, lyr_js),
+            encoding="utf-8",
+        )
+        res = self.run_gen("--force")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        albums = {a["title"]: a for a in self.load("library.json")["artists"][0]["albums"]}
+        self.assertIsNone(albums["Alpha"]["coverAsset"])
+        self.assertIsNotNone(albums["Beta"]["coverAsset"])  # disk recovery unaffected
+
     def test_refuses_out_overlapping_source(self):
         bad_out = self.source / "nested"
         res = self.run_gen("--force", out=bad_out)
