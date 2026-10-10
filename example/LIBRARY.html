@@ -4,25 +4,418 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Music Library (example)</title>
+<style>
+:root{
+  --bg:#0b0d12; --card:#161a24; --card2:#1c2130;
+  --fg:#e8ecf4; --muted:#8b94a7; --line:#242b3a;
+  --accent:#7c9cff; --accent2:#56e0c0; --accent3:#c07cff;
+  --shadow:0 16px 40px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:radial-gradient(1200px 600px at 80% -10%, #1a2140 0%, transparent 55%),
+             radial-gradient(900px 500px at -10% 10%, #12332e 0%, transparent 50%), var(--bg);
+  color:var(--fg);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.topbar{
+  position:sticky; top:0; z-index:20; backdrop-filter:blur(14px);
+  background:linear-gradient(180deg, rgba(11,13,18,.94), rgba(11,13,18,.74));
+  border-bottom:1px solid var(--line);
+}
+.topbar-in{max-width:1280px;margin:0 auto;padding:16px 24px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.logo{
+  width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font-size:27px;
+  background:linear-gradient(135deg,var(--accent),var(--accent3));color:#0b0d12;box-shadow:var(--shadow);
+}
+.brand h1{margin:0;font-size:22px;letter-spacing:.2px}
+.brand .sub{margin:3px 0 0;color:var(--muted);font-size:13.5px}
+.tools{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+input[type=search]{
+  width:min(340px,54vw);padding:11px 15px;border-radius:12px;border:1px solid var(--line);
+  background:var(--card);color:var(--fg);font-size:14.5px;outline:none;
+}
+input[type=search]:focus{border-color:var(--accent)}
+button{
+  padding:10px 15px;border-radius:11px;border:1px solid var(--line);background:var(--card);
+  color:var(--fg);font-size:13.5px;cursor:pointer;transition:.15s;
+}
+button:hover{background:var(--card2);border-color:#33405a}
+.chips{max-width:1280px;margin:0 auto;padding:12px 24px 6px;display:flex;gap:9px;overflow-x:auto;scrollbar-width:thin}
+.chip{
+  white-space:nowrap;padding:7px 13px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card);color:var(--muted);font-size:13px;text-decoration:none;transition:.15s;
+}
+.chip:hover{color:var(--fg);border-color:var(--accent);background:var(--card2)}
+main{max-width:1280px;margin:0 auto;padding:18px 24px 40px}
+.artist{margin-top:44px;scroll-margin-top:132px}
+.artist-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:20px;flex-wrap:wrap}
+.artist-head h2{margin:0;font-size:28px;letter-spacing:.3px}
+.artist-head .meta{color:var(--muted);font-size:15px}
+.album{
+  background:linear-gradient(180deg,var(--card),#141822);border:1px solid var(--line);
+  border-radius:20px;margin:0 0 22px;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.32);
+}
+.album-head{position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:26px;
+  padding:22px 26px;cursor:pointer;align-items:center;user-select:none;overflow:hidden}
+.bg{position:absolute;inset:0;background-size:cover;background-position:center;
+  filter:blur(46px) saturate(1.5) brightness(.5);transform:scale(1.35);opacity:.55;z-index:0}
+.bg.tint{background:linear-gradient(150deg,var(--grad-a),var(--grad-b));filter:none;opacity:.5}
+.shade{position:absolute;inset:0;z-index:0;
+  background:linear-gradient(180deg, rgba(13,15,22,.28), rgba(13,15,22,.86))}
+.cover{width:220px;height:220px;border-radius:16px;flex:0 0 auto;object-fit:cover;background:var(--card2);
+  border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow);position:relative;z-index:1}
+.cover.ph{display:grid;place-items:center;font-weight:800;font-size:52px;color:rgba(0,0,0,.55);letter-spacing:1px}
+.cover-wrap{position:relative;z-index:1;display:flex;flex:0 0 auto}
+.cover-print{display:none}
+.ab-info{min-width:0;position:relative;z-index:1;align-self:center}
+.ab-title{font-size:30px;font-weight:750;line-height:1.15;margin-bottom:14px;
+  overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.album-head:hover .ab-title{color:#fff}
+.ab-meta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.stat{display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:999px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:16px;font-weight:600;color:#dfe6f5}
+.stat.year{background:linear-gradient(135deg,var(--accent),var(--accent3));color:#0b0d12;border:none;font-weight:800;letter-spacing:.5px}
+.stat .lbl{color:var(--muted);font-weight:500;font-size:14px}
+.caret{color:var(--muted);font-size:16px;transition:.2s;flex:0 0 auto;position:relative;z-index:1}
+.album.collapsed .caret{transform:rotate(-90deg)}
+.tracks{display:none;padding:6px 12px 18px}
+.album:not(.collapsed) .tracks{display:block}
+.disc-label{padding:12px 16px 8px;color:var(--accent2);font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.track{display:grid;grid-template-columns:56px 1fr auto auto auto;gap:16px;align-items:center;
+  padding:10px 16px;border-radius:11px;font-size:15.5px;cursor:pointer;position:relative;transition:background .12s}
+.track:hover{background:var(--card2)}
+.track:hover .t{color:#fff}
+.track:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.track .n{color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;font-size:14.5px}
+.track .t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-left:22px;position:relative}
+.track .t::before{content:"";position:absolute;left:2px;top:50%;transform:translateY(-50%);
+  width:12px;height:12px;border-radius:3px;background:currentColor;opacity:.0;transition:opacity .15s}
+.track.has-lyrics .t::before{opacity:.22;clip-path:polygon(0 0,100% 50%,0 100%)}
+.track:hover.has-lyrics .t::before{opacity:.5}
+.track .d,.track .s{color:var(--muted);font-size:13.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.track .s{min-width:74px;text-align:right}
+.track .u{color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums;min-width:62px;text-align:right;white-space:nowrap}
+.track .u.on{color:var(--accent2);font-weight:600}
+.hidden{display:none!important}
+.empty{color:var(--muted);text-align:center;padding:40px}
+footer{max-width:1280px;margin:0 auto;padding:26px 24px 60px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+
+/* ---------- lyrics modal ---------- */
+.mb{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:rgba(4,6,10,.0);backdrop-filter:blur(0px);transition:background .3s ease,backdrop-filter .3s ease;
+  visibility:hidden}
+.mb.open{background:rgba(4,6,10,.74);backdrop-filter:blur(7px);visibility:visible}
+.mb.closing{visibility:visible}
+.modal{width:min(700px,100%);max-height:88vh;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#1a1f2c,#12151d);border:1px solid var(--line);border-radius:22px;
+  box-shadow:0 40px 90px rgba(0,0,0,.6);overflow:hidden;
+  opacity:0;transform:translateY(26px) scale(.955);
+  transition:opacity .3s ease,transform .34s cubic-bezier(.2,.85,.25,1)}
+.mb.open .modal{opacity:1;transform:none}
+.modal-head{display:flex;gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line);position:relative}
+.modal-head::before{content:"";position:absolute;inset:0;background-size:cover;background-position:center;
+  filter:blur(30px) brightness(.5);opacity:.5;z-index:0}
+.modal-head>*{position:relative;z-index:1}
+.modal-cover{width:66px;height:66px;border-radius:13px;object-fit:cover;flex:0 0 auto;border:1px solid rgba(255,255,255,.1)}
+.modal-cover.ph{display:grid;place-items:center;font-weight:800;font-size:24px;color:rgba(0,0,0,.55);
+  background:linear-gradient(135deg,var(--accent2),var(--accent))}
+.modal-info{min-width:0}
+.modal-title{font-size:20px;font-weight:750;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-sub{color:var(--muted);font-size:13px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-close{margin-left:auto;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--fg);font-size:19px;line-height:0;
+  cursor:pointer;flex:0 0 auto;transition:.15s;padding:0}
+.modal-close svg{display:block;width:15px;height:15px;overflow:visible}
+.modal-close:hover{background:rgba(255,255,255,.14);transform:rotate(90deg)}
+.modal-body{padding:22px 26px 30px;overflow:auto;line-height:1.75;font-size:15.5px;color:#dde4f2;
+  white-space:pre-wrap;word-wrap:break-word}
+.modal-body.none{color:var(--muted);text-align:center;padding:44px 26px}
+.modal-body .badge{display:inline-block;margin-bottom:14px;font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;
+  color:#b9c8ff;border:1px solid rgba(124,156,255,.35);background:rgba(124,156,255,.12);padding:3px 10px;border-radius:999px}
+.modal-foot{padding:12px 22px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;display:flex;gap:10px;align-items:center}
+.modal::-webkit-scrollbar,.modal-body::-webkit-scrollbar{width:10px}
+.modal-body::-webkit-scrollbar-thumb{background:#2a3346;border-radius:8px}
+
+@media(max-width:860px){
+  .album-head{grid-template-columns:auto 1fr;gap:18px;padding:18px}
+  .cover{width:150px;height:150px}
+  .ab-title{font-size:22px}
+  .stat{font-size:14px;padding:6px 12px}
+  .caret{display:none}
+}
+@media(max-width:560px){
+  .album-head{grid-template-columns:1fr;gap:14px}
+  .cover{width:100%;max-width:260px;height:auto;aspect-ratio:1/1}
+  .ab-title{font-size:21px}
+  .track{grid-template-columns:36px 1fr auto;gap:10px;font-size:14.5px}
+  .track .s{display:none}
+  .track .u{display:none}
+  .mb{padding:10px}
+  .modal-body{padding:18px}
+}
+
+/* ---------- compact print version ---------- */
+@media print{
+  @page{margin:12mm}
+  body{background:#fff !important;color:#000 !important}
+  .topbar,.chips,.mb,.empty,#printBtn{display:none !important}
+  main{max-width:none;margin:0;padding:0}
+  footer{color:#444;border-color:#ccc}
+  .artist{margin-top:14px;break-inside:avoid}
+  .artist-head{border-color:#bbb;padding-bottom:4px;margin-bottom:8px}
+  .artist-head h2{font-size:15pt;color:#000}
+  .artist-head .meta{font-size:8.5pt;color:#333}
+  .album{display:flex;gap:10px;border:1px solid #ccc;border-radius:6px;box-shadow:none;background:#fff;
+    margin:0 0 8px;padding:8px;break-inside:avoid;page-break-inside:avoid}
+  .album-head{display:block;padding:0;cursor:default;background:none;overflow:visible;width:150px;flex:0 0 150px}
+  .bg,.shade,.caret{display:none !important}
+  .cover{width:130px;height:130px;border-radius:4px;border:1px solid #ddd;box-shadow:none}
+  .cover.ph{color:#666;font-size:26px;background:#eee;border:1px solid #ccc}
+  .cover-wrap .hide-print{display:none !important}
+  .cover-print{display:block !important;width:130px;height:130px;object-fit:cover;border-radius:4px;border:1px solid #ddd}
+  .ab-info{margin-top:6px}
+  .ab-title{font-size:11pt;color:#000 !important;margin:4px 0 4px;white-space:normal}
+  .ab-meta{gap:5px}
+  .stat{font-size:7.5pt;padding:2px 7px;background:#f0f0f0;border-color:#ccc;color:#000}
+  .stat .lbl{color:#555;font-size:7pt}
+  .stat.year{background:#222;color:#fff}
+  .tracks{display:block !important;padding:0;flex:1;min-width:0}
+  .album.collapsed .tracks{display:block !important}
+  .disc-label{color:#000;font-size:8pt;padding:2px 0;font-weight:700}
+  .track{grid-template-columns:26px 1fr auto auto;gap:6px;padding:1px 0;font-size:8.5pt;cursor:default;break-inside:avoid}
+  .track:hover{background:none}
+  .track .n{font-size:8pt;color:#555}
+  .track .t{padding-left:0;color:#000;white-space:normal}
+  .track .t::before{display:none}
+  .track .d{font-size:8pt;color:#555}
+  .track .s{display:none}
+  .track .u{font-size:7.5pt;color:#555;min-width:42px;text-align:right}
+  .print-header{display:block !important}
+}
+.print-header{display:none;font-size:18pt;font-weight:800;margin:0 0 10px}
+</style>
 </head>
 <body>
-<!--
-  EXAMPLE source of truth for my-music-library.
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo">&#9835;</div>
+      <div>
+        <h1>Music Library</h1>
+        <p class="sub">Example catalogue · 2 artists · 3 albums · 5 tracks · 15:08 of demo audio · click a track for lyrics</p>
+      </div>
+    </div>
+    <div class="tools">
+      <input id="q" type="search" placeholder="Search artists, albums, tracks&hellip;" autocomplete="off">
+      <button id="expand" type="button">Expand all</button>
+      <button id="collapse" type="button">Collapse all</button>
+      <button id="printBtn" type="button" title="Print a compact catalogue with covers">&#128424; Print</button>
+    </div>
+  </div>
+  <nav class="chips" id="chips"></nav>
+</header>
+<main id="lib"></main>
+<div class="empty hidden" id="empty">No matches.</div>
+<footer>
+  Play order: artist (A&rarr;Z) &rarr; album (release year) &rarr; disc &rarr; track. Covers shown where available. Click any track to read its lyrics.
+</footer>
 
-  This is a tiny, self-contained stand-in for the real /home/kirill/Music/LIBRARY.html.
-  The app data (library.json, lyrics.json, covers/) is generated from a file like this at
-  build time. To build with your own catalogue, either:
-    * place it at /home/kirill/Music/LIBRARY.html (used automatically when present), or
-    * point the generator at it:  MUSIC_LIBRARY=/path/to/LIBRARY.html ./gradlew :app:assembleDebug
-  See README.md and AGENTS.md. Generated assets are git-ignored and never committed.
+<div class="mb" id="mb" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="modal-head">
+      <div class="mCover"></div>
+      <div class="modal-info">
+        <div class="modal-title" id="mTitle"></div>
+        <div class="modal-sub" id="mSub"></div>
+      </div>
+      <button class="modal-close" id="mClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 L19 19 M19 5 L5 19" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+    <div class="modal-foot" id="mFoot"></div>
+  </div>
+</div>
 
-  It exercises: a multi-disc album, an embedded cover thumbnail, an album with only a
-  disk cover, an album with no art (gradient + initials placeholder), USB positions, and
-  lyrics with a Romaji badge and CJK text.
--->
 <script>
 const DATA = [{"name":"Demo Artist","albums":[{"folder":"Demo Artist - 2023 - First Light","year":2023,"title":"First Light","discs":[{"name":"Disc 1","tracks":[{"title":"Opening","n":1,"dur":212.4,"size":18874368,"file":"Demo Artist/Demo Artist - 2023 - First Light/1-01 - Opening.flac","usb":1},{"title":"Interlude","n":2,"dur":95.0,"size":10485760,"file":"Demo Artist/Demo Artist - 2023 - First Light/1-02 - Interlude.flac","usb":null}]},{"name":"Disc 2","tracks":[{"title":"Кода","n":1,"dur":301.2,"size":26214400,"file":"Demo Artist/Demo Artist - 2023 - First Light/2-01 - Coda.flac","usb":2}]}],"tracks":3,"dur":608.6,"cover_src":"Demo Artist/Demo Artist - 2023 - First Light/cover.jpg","thumb":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="},{"folder":"Demo Artist - 2024 - No Art","year":2024,"title":"No Art","discs":[{"name":null,"tracks":[{"title":"Untitled","n":1,"dur":120.0,"size":8388608,"file":"Demo Artist/Demo Artist - 2024 - No Art/01 - Untitled.flac","usb":3}]}],"tracks":1,"dur":120.0}]},{"name":"Example Band","albums":[{"folder":"Example Band - 2020 - Sample","year":2020,"title":"Sample","discs":[{"name":null,"tracks":[{"title":"Sample Song","n":1,"dur":180.0,"size":12582912,"file":"Example Band/Example Band - 2020 - Sample/01 - Sample Song.flac","usb":null}]}],"tracks":1,"dur":180.0}]}];
 const LYRICS = {"Demo Artist/Demo Artist - 2023 - First Light/2-01 - Coda.flac":{"l":"La la la\nCoda line","s":"lrclib","r":false},"Example Band/Example Band - 2020 - Sample/01 - Sample Song.flac":{"l":"サンプル\nExample lyric line","s":"lrclib","r":true}};
+const lib=document.getElementById('lib');
+const chips=document.getElementById('chips');
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function fmt(d){d=Math.round(d||0);var m=Math.floor(d/60),s=d%60;return m+':'+String(s).padStart(2,'0');}
+function fmtLong(d){d=Math.round(d||0);var h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;
+  return h?(h+'h '+String(m).padStart(2,'0')+'m'):(m+':'+String(s).padStart(2,'0'));}
+function size(b){return (b/1048576).toFixed(b>=10485760?0:1)+' MB';}
+function initials(name){var w=String(name).replace(/[^\w\s]/g,' ').trim().split(/\s+/);
+  return (((w[0]||'?')[0]||'?')+(w[1]?w[1][0]:'')).toUpperCase();}
+function hue(str){var h=0;for(var i=0;i<str.length;i++){h=(h*31+str.charCodeAt(i))%360;}return h;}
+window.phSwap=function(img){var d=document.createElement('div');d.className='cover ph';
+  d.textContent=img.getAttribute('data-ph')||'?';img.replaceWith(d);};
+
+function coverEl(al, cls){
+  if(al.cover_src){
+    var img=document.createElement('img');img.className=cls;img.loading='lazy';img.src=al.cover_src;
+    img.alt='';img.setAttribute('data-ph',initials(al.title));
+    img.onerror=function(){var d=document.createElement('div');d.className=cls+' ph';d.textContent=initials(al.title);img.replaceWith(d);};
+    return img;
+  }
+  var d=document.createElement('div');d.className=cls+' ph';var hh=hue(al.title);
+  d.style.background='linear-gradient(135deg,hsl('+hh+',55%,52%),hsl('+((hh+70)%360)+',55%,42%))';
+  d.textContent=initials(al.title);return d;
+}
+function bgDiv(al){
+  var bg;
+  if(al.cover_src){bg=document.createElement('div');bg.className='bg';bg.style.backgroundImage='url("'+al.cover_src+'")';}
+  else{var hh=hue(al.title);bg=document.createElement('div');bg.className='bg tint';
+    bg.style.setProperty('--grad-a','hsl('+hh+',45%,24%)');bg.style.setProperty('--grad-b','hsl('+((hh+60)%360)+',45%,14%)');}
+  return bg;
+}
+
+DATA.forEach(function(artist,ai){
+  var aid='a'+ai;
+  var chip=document.createElement('a');chip.className='chip';chip.href='#'+aid;chip.textContent=artist.name;
+  chips.appendChild(chip);
+
+  var sec=document.createElement('section');sec.className='artist';sec.id=aid;
+  var atracks=artist.albums.reduce(function(s,al){return s+al.tracks;},0);
+  var adur=artist.albums.reduce(function(s,al){return s+al.dur;},0);
+  var head=document.createElement('div');head.className='artist-head';
+  head.innerHTML='<h2>'+esc(artist.name)+'</h2><span class="meta">'+artist.albums.length+' albums &middot; '+
+    atracks+' tracks &middot; '+fmtLong(adur)+'</span>';
+  sec.appendChild(head);
+
+  artist.albums.forEach(function(al){
+    var card=document.createElement('article');card.className='album';
+    card.dataset.search=(artist.name+' '+al.title+' '+(al.year||'')).toLowerCase();
+
+    var headEl=document.createElement('div');headEl.className='album-head';
+    headEl.appendChild(bgDiv(al));
+    var shade=document.createElement('div');shade.className='shade';headEl.appendChild(shade);
+    var cw=document.createElement('div');cw.className='cover-wrap';
+    var sc=coverEl(al,'cover');
+    if(al.thumb && al.cover_src) sc.className+=' hide-print';
+    cw.appendChild(sc);
+    if(al.thumb && al.cover_src){var pi=document.createElement('img');pi.className='cover-print';pi.src=al.thumb;pi.alt='';cw.appendChild(pi);}
+    headEl.appendChild(cw);
+    var info=document.createElement('div');info.className='ab-info';
+    info.innerHTML='<div class="ab-title">'+esc(al.title)+'</div><div class="ab-meta">'+
+        '<span class="stat year">'+(al.year||'&mdash;')+'</span>'+
+        '<span class="stat">'+al.tracks+'<span class="lbl">&nbsp;tracks</span></span>'+
+        '<span class="stat">'+fmtLong(al.dur)+'<span class="lbl">&nbsp;total</span></span></div>';
+    headEl.appendChild(info);
+    var caret=document.createElement('span');caret.className='caret';caret.innerHTML='&#9660;';headEl.appendChild(caret);
+    card.appendChild(headEl);
+
+    var tr=document.createElement('div');tr.className='tracks';
+    al.discs.forEach(function(disc){
+      if(al.discs.length>1){var dl=document.createElement('div');dl.className='disc-label';dl.textContent=disc.name||'Disc 1';tr.appendChild(dl);}
+      disc.tracks.forEach(function(t){
+        var tn=t.n?String(t.n).padStart(2,'0'):'&mdash;';
+        var row=document.createElement('div');row.className='track';row.tabIndex=0;
+        row.setAttribute('role','button');
+        var lyr=LYRICS[t.file];
+        var has = lyr && lyr.l;
+        if(has) row.className+=' has-lyrics';
+        row.dataset.search=(t.title+' '+artist.name+' '+al.title).toLowerCase();
+        row.dataset.file=t.file;
+        row.innerHTML='<span class="n">'+tn+'</span><span class="t" title="'+esc(t.file)+'">'+esc(t.title)+
+          '</span><span class="d">'+fmt(t.dur)+'</span><span class="s">'+size(t.size)+'</span>'+
+          '<span class="u'+(t.usb==null?'':' on')+'" title="Position in the USB play order">'+
+          (t.usb==null?'N/A':('#'+t.usb))+'</span>';
+        (function(t,al,artist,row){
+          function open(){showModal(t,al,artist,row);}
+          row.addEventListener('click',open);
+          row.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
+        })(t,al,artist,row);
+        tr.appendChild(row);
+      });
+    });
+    card.appendChild(tr);
+    headEl.addEventListener('click',function(){card.classList.toggle('collapsed');});
+    sec.appendChild(card);
+  });
+  lib.appendChild(sec);
+});
+
+/* print-only title */
+var ph=document.createElement('div');ph.className='print-header';ph.textContent='Music Library';
+document.body.insertBefore(ph, document.getElementById('lib'));
+
+/* ---------- modal ---------- */
+var mb=document.getElementById('mb'), mBody=document.getElementById('mBody'),
+    mTitle=document.getElementById('mTitle'), mSub=document.getElementById('mSub'),
+    mFoot=document.getElementById('mFoot'), mClose=document.getElementById('mClose'),
+    mHead=mb.querySelector('.modal-head'), lastFocus=null;
+function showModal(t,al,artist,row){
+  lastFocus=row;
+  mTitle.textContent=t.title;
+  mSub.textContent=artist.name+' — '+al.title+(al.year?(' · '+al.year):'');
+  var oc=document.querySelector('.modal-cover');if(oc)oc.remove();
+  var c=coverEl(al,'modal-cover');mHead.insertBefore(c,mHead.firstChild);
+  var lyr=LYRICS[t.file];
+  if(lyr && lyr.l){
+    mBody.className='modal-body';
+    mBody.innerHTML=(lyr.r?'<span class="badge">Romaji</span>':'')+esc(lyr.l);
+    mFoot.textContent='Lyrics source: '+(lyr.s||'unknown')+' · '+fmt(t.dur)+' · '+size(t.size)+' · USB '+((t.usb==null)?'N/A':('#'+t.usb));
+  }else{
+    mBody.className='modal-body none';
+    mBody.textContent='No lyrics found for this track.';
+    mFoot.textContent=fmt(t.dur)+' · '+size(t.size)+' · USB '+((t.usb==null)?'N/A':('#'+t.usb));
+  }
+  mBody.scrollTop=0;
+  mb.classList.remove('closing');mb.classList.add('open');mb.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+  mClose.focus();
+}
+function hideModal(){
+  if(!mb.classList.contains('open'))return;
+  mb.classList.remove('open');mb.classList.add('closing');
+  var done=function(){mb.classList.remove('closing');mb.setAttribute('aria-hidden','true');document.body.style.overflow='';if(lastFocus)lastFocus.focus();};
+  var fired=false;var onEnd=function(e){if(e.target!==mb.querySelector('.modal'))return;if(fired)return;fired=true;done();mb.querySelector('.modal').removeEventListener('transitionend',onEnd);};
+  mb.querySelector('.modal').addEventListener('transitionend',onEnd);
+  setTimeout(function(){if(!fired){fired=true;done();}},420);
+}
+mClose.addEventListener('click',hideModal);
+mb.addEventListener('click',function(e){if(e.target===mb)hideModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')hideModal();});
+
+document.getElementById('expand').addEventListener('click',function(){
+  document.querySelectorAll('.album').forEach(function(a){a.classList.remove('collapsed');});
+});
+document.getElementById('collapse').addEventListener('click',function(){
+  document.querySelectorAll('.album').forEach(function(a){a.classList.add('collapsed');});
+});
+document.getElementById('printBtn').addEventListener('click',function(){
+  document.querySelectorAll('.album').forEach(function(a){a.classList.remove('collapsed');});
+  window.print();
+});
+
+var q=document.getElementById('q');
+q.addEventListener('input',function(){
+  var s=q.value.trim().toLowerCase();
+  var anyArtist=false;
+  document.querySelectorAll('section.artist').forEach(function(sec){
+    var any=false;
+    sec.querySelectorAll('.album').forEach(function(al){
+      var albumMatch=!s||al.dataset.search.indexOf(s)>=0;
+      var shown=0;
+      al.querySelectorAll('.track').forEach(function(row){
+        var m=!s||albumMatch||row.dataset.search.indexOf(s)>=0;
+        row.classList.toggle('hidden',!m); if(m)shown++;
+      });
+      var vis=albumMatch||shown>0;
+      al.classList.toggle('hidden',!vis);
+      if(vis){any=true; if(s)al.classList.remove('collapsed');}
+    });
+    sec.classList.toggle('hidden',!any);
+    if(any)anyArtist=true;
+  });
+  document.getElementById('empty').classList.toggle('hidden',anyArtist);
+});
 </script>
 </body>
 </html>
